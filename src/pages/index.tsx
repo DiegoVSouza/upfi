@@ -8,7 +8,59 @@ import { api } from '../services/api';
 import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
+type Data = {
+  title: string;
+  description: string;
+  url: string;
+  ts: number;
+  id: number;
+};
+type Pages = {
+  data: Data[];
+  after: string
+}
+type GetImagesResponse = {
+  headers: [];
+  data: Pages[];
+};
 export default function Home(): JSX.Element {
+  const getImages = async (
+    pageParam: string = null
+  ): Promise<GetImagesResponse> => {
+    const { data, headers } = await api.get('/api/images', {
+      params: {
+        after: pageParam,
+      },
+    });
+    console.log(data, headers);
+  
+    const formmatedData = data.map(page=>{
+      return{
+        after: page.after,
+        pages:[
+        {
+          data:[
+            {
+              title: page.data.title,
+              description: page.data.description,
+              url: page.data.url,
+              ts: page.data.ts,
+              id: page.data.id
+            }
+          ]
+        }
+        ]
+        
+      }
+        
+      
+    })
+    return { data, headers };
+  };
+  const getNextPageParam = async (data: any) => {
+    const after = data.map(data => data.after);
+    return after;
+  };
   const {
     data,
     isLoading,
@@ -16,12 +68,9 @@ export default function Home(): JSX.Element {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery(
-    'images',
-    // TODO AXIOS REQUEST WITH PARAM
-    ,
-    // TODO GET AND RETURN NEXT PAGE PARAM
-  );
+  } = useInfiniteQuery('images', () => getImages(), {
+    getNextPageParam: (lastpage, page) => lastpage.data.map(data=> data.after) ?? null,
+  });
 
   const formattedData = useMemo(() => {
     // TODO FORMAT AND FLAT DATA ARRAY
