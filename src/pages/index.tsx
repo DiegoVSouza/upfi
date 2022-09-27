@@ -8,59 +8,40 @@ import { api } from '../services/api';
 import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
-type Data = {
+type ImageData = {
   title: string;
   description: string;
   url: string;
   ts: number;
   id: number;
 };
-type Pages = {
-  data: Data[];
-  after: string
-}
+
 type GetImagesResponse = {
-  headers: [];
-  data: Pages[];
+  after: string || null;
+  data: ImageData[];
 };
 export default function Home(): JSX.Element {
   const getImages = async (
     pageParam: string = null
   ): Promise<GetImagesResponse> => {
-    const { data, headers } = await api.get('/api/images', {
-      params: {
-        after: pageParam,
-      },
-    });
-    console.log(data, headers);
-  
-    const formmatedData = data.map(page=>{
-      return{
-        after: page.after,
-        pages:[
-        {
-          data:[
-            {
-              title: page.data.title,
-              description: page.data.description,
-              url: page.data.url,
-              ts: page.data.ts,
-              id: page.data.id
-            }
-          ]
-        }
-        ]
-        
-      }
-        
-      
-    })
-    return { data, headers };
+    if(pageParam){
+      const { data } = await api.get('/api/images', {
+        params: {
+          after: pageParam,
+        },
+      });
+    console.log(data);
+
+    return  data ;
+    }
+    
+    const { data } = await api.get('/api/images')
+    console.log(data);
+
+    return data
+    
   };
-  const getNextPageParam = async (data: any) => {
-    const after = data.map(data => data.after);
-    return after;
-  };
+
   const {
     data,
     isLoading,
@@ -69,16 +50,28 @@ export default function Home(): JSX.Element {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery('images', () => getImages(), {
-    getNextPageParam: (lastpage, page) => lastpage.data.map(data=> data.after) ?? null,
+    getNextPageParam: (lastpage) => lastpage.after ?? null,
   });
 
   const formattedData = useMemo(() => {
-    // TODO FORMAT AND FLAT DATA ARRAY
+    let formattedDataTotal = [] as ImageData[];
+    const dataPages = data?.pages;
+
+    dataPages?.map(page => {
+      formattedDataTotal = [...formattedDataTotal, ...page.data];
+      return;
+    });
+
+    return formattedDataTotal;
   }, [data]);
 
-  // TODO RENDER LOADING SCREEN
+  if(isLoading) return(
+    <Loading/>
+  )
 
-  // TODO RENDER ERROR SCREEN
+  if(isError) return(
+    <Error/>
+  )
 
   return (
     <>
