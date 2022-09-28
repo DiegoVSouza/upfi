@@ -27,7 +27,7 @@ export function ModalViewImage({
           <ModalBody maxWidth='56,25rem' maxHeight='37,5rem' p='0' >
             <Image src={imgUrl} />
             <ModalFooter background='gray.800' display='flex' justifyContent='flex-start'>
-              <Link href={imgUrl}>Abrir Original</Link>
+              <Link href={imgUrl}>Abrir original</Link>
             </ModalFooter>
           </ModalBody>
         </ModalContent>
