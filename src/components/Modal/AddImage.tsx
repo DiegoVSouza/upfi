@@ -6,6 +6,7 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
 
 import { FormAddImage } from '../Form/FormAddImage';
 
@@ -21,6 +22,7 @@ export function ModalAddImage({
   const handleCloseModal = (): void => {
     onClose();
   };
+
 
   return (
     <Modal isOpen={isOpen} onClose={handleCloseModal} isCentered size="4xl">
